@@ -1,0 +1,266 @@
+drop database if exists restaurant;
+create database restaurant;
+use restaurant;
+
+create table customerAccount(
+    emailAddress varchar(100),
+    firstName varchar(100),
+    lastName varchar(100),
+    cellNum char(10),
+    streetAddress varchar(100),
+    city varchar(100),
+    pc char(6),
+    creditAmt decimal(6, 2),
+    primary key (emailAddress));
+
+create table foodOrder(
+	orderID integer,
+	totalPrice decimal(6,2),
+	tip decimal(6, 2),
+	primary key (orderID));
+
+create table food (
+	name varchar(100),
+	primary key (name));
+
+create table restaurant(
+	name varchar(100),
+	streetAddress varchar(100),
+	city varchar(100),
+	pc char(6),
+	url varchar(200),
+	primary key (name));
+
+create table employee(
+	ID integer,
+	firstName varchar(100),
+	lastName varchar(100),
+	emailAddress varchar(100),
+      	restaurantName varchar(100),
+	primary key (ID),
+      	foreign key(restaurantName) references restaurant(name));
+
+create table manager(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table serverStaff(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table chef(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table deliveryPerson(
+	empid integer primary key,
+	foreign key (empid) references employee(ID) on delete cascade);
+
+create table payment(
+	customerEmail varchar(100),
+	date date not null,
+	paymentAmount decimal(6,2) not null,
+	primary key (customerEmail, date),
+	foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade);
+
+create table shift(
+	empID integer not null,
+	day varchar(15) not null,
+	startTime int not null,
+	endTime int not null,
+	primary key (empID, day),
+	foreign key (empID) references employee(ID) on delete cascade);
+
+create table chefCredentials (
+	empID integer not null,
+	cred varchar(30),
+	primary key (empID, cred),
+	foreign key (empID) references employee(ID) on delete cascade);
+
+create table orderPlacement(
+	customerEmail varchar(100) not null,
+	orderID integer not null,
+	restaurant varchar(100) not null,
+	orderTime date,
+	primary key (customerEmail, orderID, restaurant),
+	foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade,
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (restaurant) references restaurant(name) on delete cascade);
+
+create table relatedTo(
+	customer varchar(100) not null,
+	employee integer not null,
+	relationship varchar(100),
+	primary key (customer, employee),
+	foreign key (customer) references customerAccount(emailAddress) on delete cascade,
+	foreign key (employee) references employee(ID) on delete cascade);
+
+create table menu(
+	restaurant varchar(100) not null,
+	food varchar(100) not null,
+	price decimal(6, 2),
+	primary key (restaurant, food),
+	foreign key (restaurant) references restaurant(name) on delete cascade,
+	foreign key (food) references food (name) on delete cascade);
+
+create table foodItemsinOrder(
+	orderID integer not null,
+	food varchar(100) not null,
+	primary key (orderID, food),
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (food) references food(name) on delete cascade);
+
+create table delivery(
+	orderID integer not null,
+	deliveryPerson integer not null,
+	deliveryTime date,
+	primary key (orderID, deliveryPerson),
+	foreign key (orderID) references foodOrder(orderID) on delete cascade,
+	foreign key (deliveryPerson) references employee(id) on delete cascade);
+
+create table worksAt(
+	employeeID integer not null,
+	restaurant varchar(100) not null,
+	primary key (employeeID, restaurant),
+	foreign key (employeeID) references employee(ID) on delete cascade,
+	foreign key (restaurant) references restaurant(name) on delete cascade);
+
+
+insert into restaurant values 
+	("mcdonalds", "princess st", "kingston", "K1M1M1", "mcdonalds.com"),
+	("tacobell", "princess st", "kingston", "K1M1M1", "tacobell.com"),
+	("olivegarden", "princess st", "kingston", "K1M1M1", "olivegarden.com"),
+	("burgerking", "princess st", "kingston", "K1M1M1", "burgerking.com"),
+	("pizzapizza", "princess st", "kingston", "K1M1M1", "pizzapizza.com"),
+	("redlobster", "princess st", "kingston", "K1M1M1", "redlobster.com");
+
+
+insert into employee values
+	(1, "john", "doe", "johndoe@gmail.com", "mcdonalds"),
+	(2, "jane", "doe", "janedoe@gmail.com", "tacobell"),
+	(3, "doe", "jane", "doejane@gmail.com", "olivegarden"),
+	(4, "doe", "john", "doejohn@gmail.com", "burgerking"),
+	(5, "mike", "john", "mikejohn@gmail.com", "pizzapizza"),
+	(6, "john", "mike", "johnmike@gmail.com", "redlobster");
+
+insert into chef values
+	(1),
+	(2),
+	(3),
+	(4),
+	(5),
+	(6);
+
+insert into chefcredentials values
+	(1, "cred"),
+	(2, "credit"),
+	(3, "cdit"),
+	(4, "crit"),
+	(5, "dit"),
+	(6, "crt");
+
+insert into customeraccount values
+	("summerferris@gmail.com", "Summer", "Ferris", "1231232323", "king st", "kingston", "k1m2m2", 5), 
+	("kennedybarmen@gmail.com", "Kennedy", "Barmen", "1298732145", "Princess st", "kingston", "k8m6m6", 8), 
+	("Samanthabennette@gmail.com", "Samantha", "Bennette", "9879877898", "Queen st", "kingston", "k7k2m2", 7), 
+	("Randallshowmen @gmail.com", "Randall", "Showmen", "5453215452", "Dally st", "Ottawa", "k4p3p3", 6),
+	("Mikelowman@gmail.com", "Mike", "Lowman", "6733762348", "Bronx st ", "Pembroke", "k8a4a2", 4),
+	("Jadencrown@gmail.com", "Jaden", "Crown", "1230912345", "Annabelle st ", "Hamilton", "L8m6m6", 9);
+
+insert into foodorder values 
+	(1, 17.22, 5),
+	(2, 12.32, 2),
+	(3, 1.22, 6),
+	(4, 7.22, 8),
+	(5, 22.22, 2),
+	(6, 32.22, 1),
+	(7, 12.22, 0),
+	(8, 2.22, 5);
+
+insert into delivery values
+	(1, 3, "2023-04-07"),
+	(2, 4, "2023-04-07"),
+	(3, 4, "2023-04-09"),
+	(4, 1, "2023-04-10"),
+	(8, 1, "2023-04-11"),
+	(5, 3, "2023-04-08"),
+	(6, 4, "2023-04-11"),
+	(7, 4, "2023-04-11");
+
+insert into deliveryPerson values
+	(1),
+	(3),
+	(4);
+
+insert into food values 
+	("burger"),
+	("pasta"),
+	("taco"),
+	("mcchicken"),
+	("salad"),
+	("pizza");
+
+insert into fooditemsinorder values 
+	(1 , "pizza"),
+	(2 , "taco"),
+	(3 , "salad"),
+	(4 , "salad"),
+	(5 , "mcchicken"),
+	(6 , "pasta"),
+	(7 , "taco"),
+	(8 , "pizza");
+
+insert into manager values 
+	(2),
+	(6);
+
+insert into menu values 
+	("mcdonalds", "mcchicken", "7.99"),
+	("olivegarden", "pasta", "9.99"),
+	("tacobell", "taco", "1.99"),
+	("burgerking", "burger", "1.99"),
+	("pizzapizza", "pizza", "5.99"),
+	("redlobster", "salad", "4.99");
+
+insert into orderplacement values 
+	("summerferris@gmail.com" , 1, "pizzapizza", "2023-04-07"),
+	("summerferris@gmail.com", 2, "tacobell", "2023-04-07"),
+	("summerferris@gmail.com", 3, "redlobster", "2023-04-09"),
+	("summerferris@gmail.com", 4, "redlobster", "2023-04-10"),
+	("summerferris@gmail.com", 5, "mcdonalds", "2023-04-08"),
+	("summerferris@gmail.com", 6, "olivegarden", "2023-04-11"),
+	("summerferris@gmail.com", 7, "tacobell", "2023-04-11"),
+	("summerferris@gmail.com", 8, "pizzapizza", "2023-04-11");
+
+insert into payment values
+	("summerferris@gmail.com" , "2023-04-07", 18.99),
+	("kennedybarmen@gmail.com", "2023-04-07", 2.99),
+	("Samanthabennette@gmail.com", "2023-04-09", 20.99),
+	("Randallshowmen @gmail.com", "2023-04-10", 11.99),
+	("Mikelowman@gmail.com", "2023-04-08", 7.99),
+	("Jadencrown@gmail.com", "2023-04-11", 9.99);
+
+insert into relatedto values 
+	("summerferris@gmail.com", 1, "delivery"),
+	("summerferris@gmail.com", 3, "delivery"),
+	("summerferris@gmail.com", 4, "delivery");
+
+insert into shift values 
+	(1, "Saturday", 2, 9),
+	(1, "Tuesday", 1, 5),
+	(2, "Sunday", 3, 8),
+	(3, "Thursday", 2, 8);
+
+insert into serverstaff values
+	(1),
+	(5),
+	(6);
+
+insert into worksat values
+	(1, "mcdonalds"),
+	(2,"tacobell"),
+	(3,"olivegarden"),
+	(4,"burgerking"),
+	(5,"pizzapizza"),
+	(6,"redlobster");
+
